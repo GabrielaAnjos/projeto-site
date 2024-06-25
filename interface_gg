@@ -1,0 +1,206 @@
+import tkinter as tk
+from tkinter import scrolledtext, messagebox, Listbox, SINGLE
+from selenium import webdriver
+from selenium.webdriver.common.by import By
+import threading
+import time
+
+# Simulating external Python function calls
+def external_function_1():
+    time.sleep(2)
+    return "Resultado da Função Externa 1"
+
+def external_function_2():
+    time.sleep(2)
+    return "Resultado da Função Externa 2"
+
+def external_function_3():
+    time.sleep(2)
+    return "Resultado da Função Externa 3"
+
+def selenium_task(task_name):
+    try:
+        driver = webdriver.Chrome()  # A valid path to the chromedriver executable is required.
+        driver.get("https://example.com")
+        time.sleep(2)
+        driver.quit()
+        return f"Selenium {task_name} completada com sucesso."
+    except Exception as e:
+        return f"Erro na Selenium {task_name}: {str(e)}"
+
+# Função para adicionar uma rotina à lista de rotinas ativas
+def add_to_active_tasks(thread, task_name):
+    active_tasks.append((thread, task_name))
+    active_tasks_listbox.insert(tk.END, task_name)
+
+# Funções dos botões da primeira linha
+def func1():
+    thread = threading.Thread(target=run_external_function, args=(external_function_1, "Função 1"))
+    thread.start()
+    add_to_active_tasks(thread, "Função 1")
+
+def func2():
+    thread = threading.Thread(target=run_external_function, args=(external_function_2, "Função 2"))
+    thread.start()
+    add_to_active_tasks(thread, "Função 2")
+    time.sleep(10)
+
+def func3():
+    thread = threading.Thread(target=run_external_function, args=(external_function_3, "Função 3"))
+    thread.start()
+    add_to_active_tasks(thread, "Função 3")
+
+def run_external_function(func, task_name):
+    result = func()
+    log_status(result)
+    time.sleep(10)
+    remove_from_active_tasks(task_name)
+
+# Funções dos botões Selenium
+def selenium_func1():
+    selected_option = radio_var.get()
+    task_name = f"Selenium Função 1 com a opção {selected_option}"
+    thread = threading.Thread(target=run_selenium_function, args=(task_name,))
+    thread.start()
+    add_to_active_tasks(thread, task_name)
+
+def selenium_func2():
+    selected_option = radio_var.get()
+    task_name = f"Selenium Função 2 com a opção {selected_option}"
+    thread = threading.Thread(target=run_selenium_function, args=(task_name,))
+    thread.start()
+    add_to_active_tasks(thread, task_name)
+
+def selenium_func3():
+    selected_option = radio_var.get()
+    task_name = f"Selenium Função 3 com a opção {selected_option}"
+    thread = threading.Thread(target=run_selenium_function, args=(task_name,))
+    thread.start()
+    add_to_active_tasks(thread, task_name)
+
+def run_selenium_function(task_name):
+    result = selenium_task(task_name)
+    log_status(result)
+    remove_from_active_tasks(task_name)
+
+# Funções dos botões da quarta linha
+def func4():
+    thread = threading.Thread(target=run_simple_function, args=("Função 4",))
+    thread.start()
+    add_to_active_tasks(thread, "Função 4")
+
+def func5():
+    thread = threading.Thread(target=run_simple_function, args=("Função 5",))
+    thread.start()
+    add_to_active_tasks(thread, "Função 5")
+
+def run_simple_function(task_name):
+    result = f"{task_name} chamada"
+    log_status(result)
+    remove_from_active_tasks(task_name)
+
+# Função para interromper rotina
+def stop_routine():
+    try:
+        selected_index = active_tasks_listbox.curselection()[0]
+        selected_task = active_tasks[selected_index]
+        thread, task_name = selected_task
+        if thread.is_alive():
+            # Not a proper way to kill a thread but for simulation purpose
+            log_status(f"{task_name} interrompida.")
+            remove_from_active_tasks(task_name)
+    except IndexError:
+        log_status("Nenhuma rotina selecionada.")
+
+def remove_from_active_tasks(task_name):
+    for i, (_, name) in enumerate(active_tasks):
+        if name == task_name:
+            active_tasks.pop(i)
+            active_tasks_listbox.delete(i)
+            break
+
+# Função para logar status
+def log_status(message):
+    status_text.config(state=tk.NORMAL)
+    status_text.insert(tk.END, message + "\n")
+    status_text.config(state=tk.DISABLED)
+
+# Configuração da janela principal
+root = tk.Tk()
+root.title("Interface Gráfica")
+
+# Primeira linha de botões
+frame1 = tk.Frame(root)
+frame1.pack(pady=5)
+
+btn1 = tk.Button(frame1, text="Função 1", command=func1)
+btn1.pack(side=tk.LEFT, padx=5)
+
+btn2 = tk.Button(frame1, text="Função 2", command=func2)
+btn2.pack(side=tk.LEFT, padx=5)
+
+btn3 = tk.Button(frame1, text="Função 3", command=func3)
+btn3.pack(side=tk.LEFT, padx=5)
+
+# Segunda linha de radio buttons
+frame2 = tk.Frame(root)
+frame2.pack(pady=5)
+
+radio_var = tk.StringVar()
+radio_var.set("RV")
+
+rb1 = tk.Radiobutton(frame2, text="RV", variable=radio_var, value="RV")
+rb1.pack(side=tk.LEFT, padx=5)
+
+rb2 = tk.Radiobutton(frame2, text="BMF", variable=radio_var, value="BMF")
+rb2.pack(side=tk.LEFT, padx=5)
+
+rb3 = tk.Radiobutton(frame2, text="BOV", variable=radio_var, value="BOV")
+rb3.pack(side=tk.LEFT, padx=5)
+
+# Terceira linha de botões para funções Selenium
+frame3 = tk.Frame(root)
+frame3.pack(pady=5)
+
+btn4 = tk.Button(frame3, text="Selenium Função 1", command=selenium_func1)
+btn4.pack(side=tk.LEFT, padx=5)
+
+btn5 = tk.Button(frame3, text="Selenium Função 2", command=selenium_func2)
+btn5.pack(side=tk.LEFT, padx=5)
+
+btn6 = tk.Button(frame3, text="Selenium Função 3", command=selenium_func3)
+btn6.pack(side=tk.LEFT, padx=5)
+
+# Quarta linha de botões
+frame4 = tk.Frame(root)
+frame4.pack(pady=5)
+
+btn7 = tk.Button(frame4, text="Função 4", command=func4)
+btn7.pack(side=tk.LEFT, padx=5)
+
+btn8 = tk.Button(frame4, text="Função 5", command=func5)
+btn8.pack(side=tk.LEFT, padx=5)
+
+# Quinta linha - bloco de texto para status
+frame5 = tk.Frame(root)
+frame5.pack(pady=5)
+
+status_text = scrolledtext.ScrolledText(frame5, width=50, height=10, state=tk.DISABLED)
+status_text.pack()
+
+# Bloco para listar tarefas ativas
+active_tasks_frame = tk.Frame(root)
+active_tasks_frame.pack(pady=5)
+
+active_tasks_listbox = Listbox(active_tasks_frame, selectmode=SINGLE)
+active_tasks_listbox.pack()
+
+# Botão para interromper rotina ativa
+stop_button = tk.Button(root, text="Interromper Rotina", command=stop_routine)
+stop_button.pack(pady=5)
+
+# Lista de tarefas ativas
+active_tasks = []
+
+# Inicialização da janela principal
+root.mainloop()
